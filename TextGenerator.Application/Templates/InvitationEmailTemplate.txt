@@ -1,0 +1,10 @@
+﻿Hello #{{Name}},
+
+
+We will be glad to see you in our office in #{{Address.City}} at #{{Address.Line1}}.
+
+Looking forward to meeting with you!
+
+
+Best,
+Our company.
