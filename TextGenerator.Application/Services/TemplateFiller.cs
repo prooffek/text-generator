@@ -86,11 +86,12 @@ namespace TextGenerator.Application.Services
 
                 if (value is string str && !string.IsNullOrWhiteSpace(str))
                     return str;
-
-                return GetValue(placeholderName.Replace($"{path.First()}.", string.Empty), value);
+                
+                if (value.GetType().IsClass)
+                    return GetValue(placeholderName.Replace($"{path.First()}.", string.Empty), value);
             }
 
-            throw new NullReferenceException($"Incorrect placehlder name: property '{path.First()}' has incorrect value.");
+            throw new ArgumentException($"Incorrect property: property '{path.First()}' has incorrect value.");
         }
 
         private string GetText(string template, IDictionary<string, string> valuesDict)

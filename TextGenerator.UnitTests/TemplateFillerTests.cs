@@ -1,7 +1,4 @@
 ﻿using FluentAssertions;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
 using TextGenerator.Application.Models;
 using TextGenerator.Application.Services;
 
@@ -84,11 +81,11 @@ namespace TextGenerator.UnitTests
             InvitationEmail? model = new InvitationEmail();
 
             // Act
-            var exception = Assert.ThrowsException<NullReferenceException>(() => service.GenerateText(template, model));
+            var exception = Assert.ThrowsException<ArgumentException>(() => service.GenerateText(template, model));
 
             // Assert
             exception.Should().NotBeNull();
-            exception.Message.Should().Be($"Incorrect placehlder name: property '{nameof(model.Name)}' has incorrect value.");
+            exception.Message.Should().Be($"Incorrect property: property '{nameof(model.Name)}' has incorrect value.");
         }
 
         [TestMethod]
@@ -120,6 +117,32 @@ namespace TextGenerator.UnitTests
             // Assert
             exception.Should().NotBeNull();
             exception.Message.Should().Be($"Value of the placeholder '{placeholder}' cannot be empty.");
+        }
+
+        [TestMethod]
+        [DataRow("Age")]
+        [DataRow("Income")]
+        [DataRow("HeightInMeters")]
+        public void TemplateFiller_GenerateText_ShouldThrowIfNumber(string placeholder)
+        {
+            // Arrange
+            TemplateFiller service = new();
+
+            var template = $"#{{{{{placeholder}}}}}";
+            var model = new WrongModel
+            {
+                Username = "Test",
+                Age = 42,
+                Income = 987098M,
+                HeightInMeters = 1.8F,
+            };
+
+            // Act
+            var exception = Assert.ThrowsException<ArgumentException>(() => service.GenerateText(template, model));
+
+            // Assert
+            exception.Should().NotBeNull();
+            exception.Message.Should().Be($"Incorrect property: property '{placeholder}' has incorrect value.");
         }
 
         [TestMethod]
@@ -180,5 +203,13 @@ Our company.";
                 }
             };
         }
+    }
+
+    internal class WrongModel 
+    {
+        public string Username { get; set; }
+        public int Age { get; set; }
+        public decimal Income { get; set; }
+        public float HeightInMeters { get; set; }
     }
 }
