@@ -72,30 +72,32 @@ namespace TextGenerator.Application.Services
             var accessor = TypeAccessor.Create(model.GetType());
 
             var path = placeholderName.Split('.').Select(s => s.Trim());
+            string? propName = path.Count() > 0 ? path.First() : null;
+            object ? value = null;
 
-            object? value = null;
+            var propExists = propName is not null && accessor.GetMembers().Any(prop => prop.Name == propName);
 
-            if (path.Count() > 0)
+            if (propExists)
             {
-                value = accessor[model, path.First()];
+                value = accessor[model, propName];
             }
 
             if (value is not null)
             {
                 if (value is string s && string.IsNullOrWhiteSpace(s))
-                    throw new ArgumentException($"Value of the placeholder '{path.First()}' cannot be empty.");
+                    throw new ArgumentException($"Value of the placeholder '{propName}' cannot be empty.");
 
                 if (value is string str)
                     return str;
 
                 if(value is IEnumerable)
-                    throw new ArgumentException($"Incorrect property: property '{path.First()}' has incorrect value.");
+                    throw new ArgumentException($"Incorrect property: property '{propName}' has incorrect value.");
 
                 if (value.GetType().IsClass)
-                    return GetValue(placeholderName.Replace($"{path.First()}.", string.Empty), value);
+                    return GetValue(placeholderName.Replace($"{propName}.", string.Empty), value);
             }
 
-            throw new ArgumentException($"Incorrect property: property '{path.First()}' has incorrect value.");
+            throw new ArgumentException($"Incorrect property: property '{propName}' not found or has incorrect value.");
         }
 
         private string GetText(string template, IDictionary<string, string> valuesDict)

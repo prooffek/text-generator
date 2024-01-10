@@ -40,6 +40,8 @@ namespace TextGenerator.UnitTests
         [TestMethod]
         [DataRow("Test template without placeholder.")]
         [DataRow("Test template with wrong {{placeholder}}.")]
+        [DataRow("Test template with wrong #{{}}.")]
+        [DataRow("Test template with wrong #{{test_placeholder}}.")]
         public void TemplateFiller_GenerateText_ShouldThrowIfWrongTemplate(string template)
         {
             // Arrange
@@ -86,7 +88,7 @@ namespace TextGenerator.UnitTests
 
             // Assert
             exception.Should().NotBeNull();
-            exception.Message.Should().Be($"Incorrect property: property '{nameof(model.Name)}' has incorrect value.");
+            exception.Message.Should().Be($"Incorrect property: property '{nameof(model.Name)}' not found or has incorrect value.");
         }
 
         [TestMethod]
@@ -121,13 +123,11 @@ namespace TextGenerator.UnitTests
         }
 
         [TestMethod]
-        [DataRow("Password")]
         [DataRow("Age")]
         [DataRow("Income")]
         [DataRow("HeightInMeters")]
-        [DataRow("ChildrenNames")]
         [DataRow("HasWife")]
-        public void TemplateFiller_GenerateText_ShouldThrowIfNumber(string placeholder)
+        public void TemplateFiller_GenerateText_ShouldThrowIfValueType(string placeholder)
         {
             // Arrange
             TemplateFiller service = new();
@@ -149,7 +149,53 @@ namespace TextGenerator.UnitTests
 
             // Assert
             exception.Should().NotBeNull();
+            exception.Message.Should().Be($"Incorrect property: property '{placeholder}' not found or has incorrect value.");
+        }
+
+        [TestMethod]
+        [DataRow("Password")]
+        [DataRow("ChildrenNames")]
+        public void TemplateFiller_GenerateText_ShouldThrowIfCollection(string placeholder)
+        {
+            // Arrange
+            TemplateFiller service = new();
+
+            var template = $"#{{{{{placeholder}}}}}";
+            var model = new WrongModel
+            {
+                Password = Encoding.ASCII.GetBytes("TestPassword"),
+                ChildrenNames = new List<string> { "John", "Alice" },
+            };
+
+            // Act
+            var exception = Assert.ThrowsException<ArgumentException>(() => service.GenerateText(template, model));
+
+            // Assert
+            exception.Should().NotBeNull();
             exception.Message.Should().Be($"Incorrect property: property '{placeholder}' has incorrect value.");
+        }
+
+        [TestMethod]
+        [DataRow("paSSword")]
+        [DataRow("Children Names")]
+        [DataRow(" ")]
+        [DataRow(" a  ")]
+        [DataRow("test")]
+
+        public void TemplateFiller_GenerateText_ShouldThrowIfPropertyNotFound(string placeholder)
+        {
+            // Arrange
+            TemplateFiller service = new();
+
+            var template = $"#{{{{{placeholder}}}}}";
+            var model = new WrongModel();
+
+            // Act
+            var exception = Assert.ThrowsException<ArgumentException>(() => service.GenerateText(template, model));
+
+            // Assert
+            exception.Should().NotBeNull();
+            exception.Message.Should().Be($"Incorrect property: property '{placeholder.Trim()}' not found or has incorrect value.");
         }
 
         [TestMethod]
