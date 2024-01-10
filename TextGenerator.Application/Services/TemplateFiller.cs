@@ -25,7 +25,7 @@ namespace TextGenerator.Application.Services
 
             var placeholderNames = GetPlaceholderNames(template);
 
-            var values = GetPlaceholderValues(placeholderNames, model);
+            var values = GetPlaceholderValueDict(placeholderNames, model);
 
             return GetText(template, values);
         }
@@ -55,7 +55,7 @@ namespace TextGenerator.Application.Services
                 .ToList();
         }
 
-        private IDictionary<string, string> GetPlaceholderValues<TDataModel>(IEnumerable<string> placeholderNames, TDataModel model)
+        private IDictionary<string, string> GetPlaceholderValueDict<TDataModel>(IEnumerable<string> placeholderNames, TDataModel model)
         {
             Dictionary<string, string> valuesDict = new();
 
