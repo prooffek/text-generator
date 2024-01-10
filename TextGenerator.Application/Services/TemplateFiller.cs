@@ -1,4 +1,5 @@
 ﻿using FastMember;
+using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 using TextGenerator.Application.Interfaces;
@@ -84,9 +85,12 @@ namespace TextGenerator.Application.Services
                 if (value is string s && string.IsNullOrWhiteSpace(s))
                     throw new ArgumentException($"Value of the placeholder '{path.First()}' cannot be empty.");
 
-                if (value is string str && !string.IsNullOrWhiteSpace(str))
+                if (value is string str)
                     return str;
-                
+
+                if(value is IEnumerable)
+                    throw new ArgumentException($"Incorrect property: property '{path.First()}' has incorrect value.");
+
                 if (value.GetType().IsClass)
                     return GetValue(placeholderName.Replace($"{path.First()}.", string.Empty), value);
             }

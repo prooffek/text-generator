@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using System.Text;
 using TextGenerator.Application.Models;
 using TextGenerator.Application.Services;
 
@@ -120,9 +121,12 @@ namespace TextGenerator.UnitTests
         }
 
         [TestMethod]
+        [DataRow("Password")]
         [DataRow("Age")]
         [DataRow("Income")]
         [DataRow("HeightInMeters")]
+        [DataRow("ChildrenNames")]
+        [DataRow("HasWife")]
         public void TemplateFiller_GenerateText_ShouldThrowIfNumber(string placeholder)
         {
             // Arrange
@@ -132,9 +136,12 @@ namespace TextGenerator.UnitTests
             var model = new WrongModel
             {
                 Username = "Test",
+                Password = Encoding.ASCII.GetBytes("TestPassword"),
                 Age = 42,
                 Income = 987098M,
                 HeightInMeters = 1.8F,
+                ChildrenNames = new List<string> { "John", "Alice" },
+                HasWife = true,
             };
 
             // Act
@@ -208,8 +215,11 @@ Our company.";
     internal class WrongModel 
     {
         public string Username { get; set; }
+        public byte[] Password { get; set; }
         public int Age { get; set; }
         public decimal Income { get; set; }
         public float HeightInMeters { get; set; }
+        public List<string> ChildrenNames { get; set; }
+        public bool HasWife { get; set; }
     }
 }
